@@ -1,5 +1,33 @@
 # Animal-Movement-ABM
 
+## Agent-based Model for Animal Movement. 
+
+
+### Code development Roadmap
+
+This is the roadmap for developing the first ABMs, which to begin with will be single .jl files. 
+
+- [x] v0.1. The space is `GridSpace`. Model has property `grass` (randomly distributed), with a simple time-based regrowth dynamic. Agents have `energy` and a `\Deltaenergy` fields. Agents move randomly (decreasing current energy levels) and eat grass when available (increasing current energy levels). 
+
+- [x] v0.2. Add a home-range feature to the `agent_step!` function in order to avoid that sheep end up diffusing through space. This feature will consist in defining a point in space that will be the `attractor`, which will be the point where the sheep gravitate towards.  
+
+- [x] v0.3. Add sheep gregarious behavior, in a similar way as implemented in the flocking [example](https://juliadynamics.github.io/Agents.jl/stable/examples/flock/) but adapted for a discrete space. Sheep will prefer regions or groups of patches that already contain sheep. Sheep will contain a field `visual_distance` which will define the distance to  which it can sense the surrounding sheep. 
+
+
+- [x] v0.4. Implement directed movement with pathfinding. Now sheep will alternate between a random walk, a directed movement towards a random point in the `GridSpace` and a resting behaviour. There will be a `counter` parameter that dictates the amount of time-steps that each agent spends in each behaviour. When a behaviour ends, there's a transition to another behaviour. The probabilities to transition to another behaviour or to stay in the same behaviour are uniform. This implementation will follow the Mixed-Agent Ecosystem Pathfinding [example](https://juliadynamics.github.io/Agents.jl/stable/examples/rabbit_fox_hawk/)
+
+
+- [x] v0.5. Add the spatial property `elevation`, which consists in a 2D matrix, where each value denotes the height of the terrain at that point.  Also define regions where sheep cannot walk and take them into account in the `agent_step!` function. 
+
+
+- [x] v0.6. Use the `elevation` model property as a cost metric for the path finding.  
+
+
+- [ ] v0.7. Not defined yet.  
+
+
+--------------------------------------------------------------------------------------
+
 This code base is using the [Julia Language](https://julialang.org/) and
 [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
 to make a reproducible scientific project named
