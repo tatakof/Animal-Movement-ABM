@@ -23,8 +23,23 @@ This is the roadmap for developing the first ABMs, which to begin with will be s
 - [x] v0.6. Use the `elevation` model property as a cost metric for the path finding.  
 
 
-- [ ] v0.7. Not defined yet.  
+- [ ] v0.7. Agents will spend a variable amount of time in each behaviour that will be sampled from behaviour's time distributions. Once the time dedicated to a given behaviour ends, transition probability functions will determine which behaviour will be next. Each behaviour will be associated with different times of residence in the landscape cells and with different probabilities to choose a neighbouring cell. Both the times of residence and the probabilities to choose a neighbouring cell will be a function of the type of behaviour, of the agent's condition (e.g. energy) and of the landscape characteristics (height, slope, type of habitat, etc.). All of these implies setting a specific `counter` to each behaviour, that will be sampled from time distributions. It also implies defining 
 
+nearby cells is not as straight forward to define in a continuous space
+you can still enforce the concept of cells, by choosing
+
+pathfinding can have the discretized version of the continuous space, so there you can have the nearby_walkable() function. 
+
+To define a model property like grass in a continuous space, you have to add on top of it a discretized version. 
+
+you have patches of grass but you move continously
+
+get_spatial_property and get...property, these functions are made to work with discrete things in a continuous space. 
+
+To make it truly generalizable you should make a function that makes functions using booleans. 
+
+
+document the API?
 
 --------------------------------------------------------------------------------------
 
@@ -37,9 +52,9 @@ It is authored by Felici.
 
 To (locally) reproduce this project, do the following:
 
-0. Download this code base. Notice that raw data are typically not included in the
+1. Download this code base. Notice that raw data are typically not included in the
    git-history and may need to be downloaded independently.
-1. Open a Julia console and do:
+2. Open a Julia console and do:
    ```
    julia> using Pkg
    julia> Pkg.add("DrWatson") # install globally, for using `quickactivate`

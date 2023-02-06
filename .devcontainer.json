@@ -1,7 +1,7 @@
 // See https://github.com/julia-vscode/julia-devcontainer/blob/master/Dockerfile for image contents
 {
 	"name": "Julia (Community)",
-	"image": "ghcr.io/julia-vscode/julia-devcontainer",
+	"image": "ghcr.io/julia-vscode/julia-devcontainer:latest", // delete :latest to go back to normal
 
 	// Configure tool-specific properties.
 	"customizations": {

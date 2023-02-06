@@ -3,12 +3,13 @@
 #  for the path finding.  
 
 ## Install packages
-# using Pkg
-# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions", "Plots", "ImageMagick", "FileIO"])
+using Pkg
+Pkg.add(["Agents", "Tables", "Random", "CairoMakie", "InteractiveDynamics", "Distributions", "Plots", "ImageMagick", "FileIO"])
 
+using GLMakie
 ## Load packages
 using Agents, Random
-using GLMakie, InteractiveDynamics
+using CairoMakie, InteractiveDynamics
 import ImageMagick
 using FileIO: load
 using Agents.Pathfinding
@@ -22,6 +23,8 @@ using Distributions
     movement_cost::Float64
 end
 
+
+
 ## Model function
 function initialize_model(;
     n_sheep = 40, 
@@ -34,16 +37,16 @@ function initialize_model(;
     counter = 50, 
 
 )
-    heightmap_url = "https://raw.githubusercontent.com/JuliaDynamics/" *
-    "JuliaDynamics/master/videos/agents/runners_heightmap.jpg"
-    ## Download and load the heightmap. The grayscale value is converted to `Float64` and
+    heightmap_url = "https://raw.githubusercontent.com/juliadynamics/" *
+    "juliadynamics/master/videos/agents/runners_heightmap.jpg"
+    ## download and load the heightmap. the grayscale value is converted to `float64` and
     ## scaled from 1 to 40
-    elevation = floor.(Int, convert.(Float64, load(download(heightmap_url))) * 39) .+ 1
-    ## The x and y dimensions of the pathfinder are that of the heightmap
+    elevation = floor.(int, convert.(float64, load(download(heightmap_url))) * 39) .+ 1
+    ## the x and y dimensions of the pathfinder are that of the heightmap
     dims = (size(elevation))
-    ## The region of the map that is accessible to sheep is defined using `BitArrays`
-    land_walkmap = BitArray(falses(dims...))
-    water_map = BitArray(falses(dims...))
+    ## the region of the map that is accessible to sheep is defined using `bitarrays`
+    land_walkmap = bitarray(falses(dims...))
+    water_map = bitarray(falses(dims...))
 
     # land walk map will be between `water_level` and `mountain_level`
     for i = 1:dims[1], j = 1:dims[2]

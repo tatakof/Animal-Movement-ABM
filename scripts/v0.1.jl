@@ -7,12 +7,12 @@
 
 
 ## Install packages
-# using Pkg
-# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics"])
+using Pkg
+Pkg.add(["Agents", "Tables", "Random", "GLMakie", "InteractiveDynamics", "CairoMakie"])
 
 ## Load packages
 using Agents, Random
-using GLMakie, InteractiveDynamics
+using InteractiveDynamics
 
 
 
@@ -122,7 +122,7 @@ end
 ## Initialize model
 model = initialize_model()
 
-
+using CairoMakie
 
 ## Visualize
 offset(a) = (-0.1, -0.1*rand()) 
@@ -156,7 +156,7 @@ model = initialize_model()
 fig, ax, abmobs = abmplot(model;
     agent_step!, 
     model_step!, 
-    params, 
+    # params, 
     plotkwargs...
 )
 fig

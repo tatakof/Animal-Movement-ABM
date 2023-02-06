@@ -1,0 +1,1 @@
+"By the way, elevation could also be done in a 3D model as in the rabbit fox hawk example. However, I guess in our case it will be more performant to stick to 2D and use elevation as a cost metric for pathfinding." why would it be more performant to stick to 2D?
