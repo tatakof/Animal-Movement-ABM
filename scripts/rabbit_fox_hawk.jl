@@ -24,6 +24,9 @@ using Random
 import ImageMagick
 using FileIO: load
 
+import InteractiveDynamics
+
+
 @agent Animal ContinuousAgent{3} begin
     type::Symbol # one of :rabbit, :fox or :hawk
     energy::Float64
@@ -33,8 +36,8 @@ end
 # and find the euclidean norm of a Vector
 const v0 = (0.0, 0.0, 0.0) # we don't use the velocity field here
 Rabbit(id, pos, energy) = Animal(id, pos, v0, :rabbit, energy)
-Fox(id, pos, energy) = Animal(id, pos, v0, :fox, energy)
-Hawk(id, pos, energy) = Animal(id, pos, v0, :hawk, energy)
+# Fox(id, pos, energy) = Animal(id, pos, v0, :fox, energy)
+# Hawk(id, pos, energy) = Animal(id, pos, v0, :hawk, energy)
 eunorm(vec) = √sum(vec .^ 2)
 
 # The environment is generated from a heightmap: a 2D matrix, where each value denotes the
@@ -152,26 +155,26 @@ function initialize_model(
             model,
         )
     end
-    for _ in 1:n_foxes
-        add_agent_pos!(
-            Fox(
-                nextid(model),
-                random_walkable(model, model.landfinder),
-                rand(model.rng, Δe_rabbit:2Δe_rabbit),
-            ),
-            model,
-        )
-    end
-    for _ in 1:n_hawks
-        add_agent_pos!(
-            Hawk(
-                nextid(model),
-                random_walkable(model, model.airfinder),
-                rand(model.rng, Δe_rabbit:2Δe_rabbit),
-            ),
-            model,
-        )
-    end
+    # for _ in 1:n_foxes
+    #     add_agent_pos!(
+    #         Fox(
+    #             nextid(model),
+    #             random_walkable(model, model.landfinder),
+    #             rand(model.rng, Δe_rabbit:2Δe_rabbit),
+    #         ),
+    #         model,
+    #     )
+    # end
+    # for _ in 1:n_hawks
+    #     add_agent_pos!(
+    #         Hawk(
+    #             nextid(model),
+    #             random_walkable(model, model.airfinder),
+    #             rand(model.rng, Δe_rabbit:2Δe_rabbit),
+    #         ),
+    #         model,
+    #     )
+    # end
 
     return model
 end
@@ -220,10 +223,10 @@ function rabbit_step!(rabbit, model)
     end
 
     ## Get a list of positions of all nearby predators
-    predators = [
-        x.pos for x in nearby_agents(rabbit, model, model.rabbit_vision) if
-            x.type == :fox || x.type == :hawk
-            ]
+    # predators = [
+    #     x.pos for x in nearby_agents(rabbit, model, model.rabbit_vision) if
+    #         x.type == :fox || x.type == :hawk
+    #         ]
     ## If the rabbit sees a predator and isn't already moving somewhere
     if !isempty(predators) && is_stationary(rabbit, model.landfinder)
         ## Try and get an ideal direction away from predators

@@ -4,30 +4,25 @@
 #  levels) and eat grass when available (increasing current energy levels). 
 
 
+
+
+
 using Agents, LinearAlgebra
 using Random
-using InteractiveDynamics, CairoMakie
+# import InteractiveDynamics
+using InteractiveDynamics
 using FileIO: load
 using Distributions
+using GLMakie
 
 @agent Sheep ContinuousAgent{2} begin
     speed::Float64
 end
 
 
-rng = MersenneTwister(123)
-grass_level = 20
-water_level = 1
-mountain_level = 18
-grass = BitArray(
-    rand(rng, dims[1:2]...) .< ((grass_level .- heightmap) ./ (grass_level - water_level)),
-)
-
-
-dims[1:1]
 
 function initialize_model(;
-    n_sheep = 100, 
+    n_sheep = 100,  
     extent = (100., 100.),
     speed = 1.0, 
     dt = 0.1, 
@@ -88,7 +83,7 @@ function initialize_model(;
 
 
     for _ in 1:n_sheep
-        vel = Tuple(rand(model.rng, 2) * 2 .- 1)
+        vel = (-1.0, -1.0) #Tuple(rand(model.rng, 2) * 2 .- 1)
         add_agent!(
             model, 
             vel, 
@@ -98,7 +93,7 @@ function initialize_model(;
     end
 
 
-    # ### Add grass
+    ### Add grass
     # for p in positions(model)
     #     if model.land_walkmap[p...] == 1
     #         fully_grown = rand(model.rng, Bool)
@@ -113,16 +108,53 @@ end
 
 
 
-
-
-
-model = initialize_model()        
-
-
 function agent_step!(sheep, model)
-    # move_agent!(sheep, model, sheep.speed)
-    walk!(sheep, rand, model)
+    vel1 = rand(truncated(Normal(), -1, 1))
+    vel2 = rand(truncated(Normal(), -1, 1))
+    sheep.vel = (vel1, vel2)
+    move_agent!(sheep, model, sheep.speed)
+    # walk!(sheep, rand, model)
+    # walk!(sheep, (1.0, 1.0), model)
 end
+
+
+const sheep_polygon = Polygon(Point2f[(-0.5, -0.5), (1, 0), (-0.5, 0.5)])
+function sheep_marker(b::Sheep)
+    φ = atan(b.vel[2], b.vel[1]) #+ π/2 + π
+    scale(rotate2D(sheep_polygon, φ), 2)
+end
+
+
+model = initialize_model()
+fig, = abmplot(model; agent_step!, am = sheep_marker)
+
+fig
+
+
+rand(Uniform(-1, 1))
+
+
+offset(a) = (-0.1, -0.1*rand()) 
+ashape(a) = :circle 
+acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
+
+
+grasscolor(model) = 30#model.countdown ./ model.regrowth_time
+
+heatkwargs = (
+    colormap = [:white, :green], 
+    colorrange = (0, 1)
+)
+
+plotkwargs = (;
+    ac = acolor,
+    as = 15,
+    am = ashape,
+    offset,
+    scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
+    heatarray = grasscolor,
+    heatkwargs = heatkwargs,
+)
 
 
 
@@ -130,10 +162,14 @@ end
 
 
 model = initialize_model()
-fig, = abmplot(model)
 
+fig, ax, abmobs = abmplot(model;
+    # agent_step!, 
+    # model_step!, 
+    # params, 
+    plotkwargs...
+)
 fig
-
 
 
 animalcolor(a) = :white
@@ -172,3 +208,41 @@ abmvideo(
     "test.mp4", model, agent_step!;
     framerate = 20, frames = 100
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+grasscolor(model) = model.countdown ./ model.regrowth_time
+
+heatkwargs = (
+    colormap = [:white, :green], 
+    colorrange = (0, 1)
+)
+
+plotkwargs = (;
+    as = 15,
+    scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
+    heatarray = model.grass
+)
+
+params = Dict(
+    :regrowth_time => 1:1:30
+)
+
+model = initialize_model()
+fig, ax, abmobs = abmplot(model;
+    # agent_step!, 
+    # model_step!, 
+    # params, 
+    plotkwargs...
+)
+fig
