@@ -128,7 +128,7 @@ model = initialize_model()
 ## Agent stepping function
 function agent_step!(sheep, model)
     nearby_pos = [pos for pos in nearby_walkable(sheep.pos, model, AStar(model.space; walkmap = model.land_walkmap), 1)]
-    move_agent!(sheep, nearby_pos[rand(1:length(nearby_pos))], model)
+    move_agent!(sheep, nearby_pos[rand(model.rng, 1:length(nearby_pos))], model)
     sheep.energy -= sheep.movement_cost
     if sheep.energy < 0 
         kill_agent!(sheep, model)
@@ -227,7 +227,7 @@ model = initialize_model()
 
 # To view our starting population, we can build an overview plot using [`abmplot`](@ref).
 # We define the plotting details for the wolves and sheep:
-offset(a) = (-0.1, -0.1*rand()) 
+offset(a) = (-0.1, -0.1*rand(model.rng)) 
 ashape(a) = :circle 
 acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
 

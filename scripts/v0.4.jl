@@ -172,7 +172,7 @@ model = initialize_model()
 
 ## Visualize
 
-offset(a) = (-0.1, -0.1*rand()) 
+offset(a) = (-0.1, -0.1*rand(model.rng)) 
 ashape(a) = :circle 
 acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
 

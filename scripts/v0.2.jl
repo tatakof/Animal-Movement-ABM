@@ -77,7 +77,7 @@ model = initialize_model()
 # and a weighted random walk to the attractor. 
 
 function agent_step!(sheep, model, prob_random_walk = 0.5)
-    if rand(Uniform(0, 1)) < prob_random_walk
+    if rand(model.rng, Uniform(0, 1)) < prob_random_walk
     # "Normal" random walk
         walk!(sheep, rand, model)
         sheep.energy -= 1
@@ -155,7 +155,7 @@ model = initialize_model()
 
 ## Visualize
 
-offset(a) = (-0.1, -0.1*rand()) 
+offset(a) = (-0.1, -0.1*rand(model.rng)) 
 ashape(a) = :circle 
 acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
 

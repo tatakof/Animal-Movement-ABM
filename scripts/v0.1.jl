@@ -123,14 +123,16 @@ end
 model = initialize_model()
 
 using CairoMakie
+using GLMakie
 
 ## Visualize
-offset(a) = (-0.1, -0.1*rand()) 
+offset(a) = (-0.1, -0.1*rand(model.rng)) 
 ashape(a) = :circle 
 acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
 
 
 grasscolor(model) = model.countdown ./ model.regrowth_time
+
 
 heatkwargs = (
     colormap = [:white, :green], 
@@ -143,7 +145,7 @@ plotkwargs = (;
     am = ashape,
     offset,
     scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
-    heatarray = grasscolor,
+    # heatarray = grasscolor, # this errors 
     heatkwargs = heatkwargs,
 )
 
@@ -153,14 +155,15 @@ params = Dict(
 )
 
 model = initialize_model()
+
 fig, ax, abmobs = abmplot(model;
     agent_step!, 
     model_step!, 
-    # params, 
+    params, 
     plotkwargs...
 )
-fig
 
+fig
 
 abmvideo(
     "test.mp4", 
@@ -169,7 +172,7 @@ abmvideo(
     model_step!; 
     frames = 100, 
     framerate = 8, 
-    plotkwargs..., 
+    # plotkwargs..., 
 )
 
 
