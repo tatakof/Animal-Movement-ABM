@@ -79,7 +79,7 @@ model = initialize_model()
 function agent_step!(sheep, model, prob_random_walk = 0.5)
     if rand(model.rng, Uniform(0, 1)) < prob_random_walk
     # "Normal" random walk
-        walk!(sheep, rand, model)
+        random_walk!(sheep, model)
         sheep.energy -= 1
         eat!(sheep, model)
     else

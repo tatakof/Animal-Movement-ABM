@@ -73,7 +73,7 @@ end
 
 ## Agent stepping function
 function agent_step!(sheep, model)
-    walk!(sheep, rand, model)
+    randomwalk!(sheep, model)
     sheep.energy -= sheep.movement_cost
     if sheep.energy < 0 
         kill_agent!(sheep, model)

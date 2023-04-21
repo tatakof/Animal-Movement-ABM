@@ -87,9 +87,9 @@ The agent_step function will alternate between a "normal" random walk
 """
 
 function agent_step!(sheep, model, prob_random_walk = 0.3)
-    if rand(Uniform(0, 1)) < prob_random_walk
+    if rand(model.rng, Uniform(0, 1)) < prob_random_walk
     # "Normal" random walk
-        walk!(sheep, rand, model)
+        randomwalk!(sheep, model)
         sheep.energy -= 1
         eat!(sheep, model)
     else
@@ -136,7 +136,7 @@ function random_walk_gregarious(sheep, model)
         move_agent!(sheep, possible_locations[move_to], model)
     else 
     # Do a random walk
-      move_agent!(sheep, possible_locations[rand(1:8)], model)  
+      move_agent!(sheep, possible_locations[rand(model.rng, 1:8)], model)  
     end
 end
 
@@ -173,7 +173,7 @@ model = initialize_model()
 
 ## Visualize
 
-offset(a) = (-0.1, -0.1*rand()) 
+offset(a) = (-0.1, -0.1*rand(model.rng)) 
 ashape(a) = :circle 
 acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
 
