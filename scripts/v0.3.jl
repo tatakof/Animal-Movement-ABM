@@ -11,12 +11,12 @@
 
 ## Install packages
 # using Pkg
-# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions", "Plots"])
+# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions"])
 
 ## Load packages
 using Agents, Random
 using GLMakie, InteractiveDynamics
-using Distributions, Plots 
+using Distributions
 
 ## Agent definition
 @agent Sheep GridAgent{2} begin

@@ -15,7 +15,7 @@
 ## Load packages
 using Agents, Random
 using GLMakie, InteractiveDynamics
-using Distributions, Plots 
+using Distributions 
 
 
 ## Agent definition
@@ -115,11 +115,9 @@ function random_walk_to_attractor(sheep, model)
 end
 
 # Show shape of f
-using Plots
 x = 1:10 
 y = exp.(- x / 3)
-Plots.plot(x, y)
-
+lines(x, y)
 
 ## Describe
 function eat!(sheep, model)
