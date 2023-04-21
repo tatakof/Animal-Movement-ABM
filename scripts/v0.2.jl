@@ -10,12 +10,13 @@
 
 ## Install packages
 # using Pkg
-# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions", "Plots"])
+# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions"])
 
 ## Load packages
 using Agents, Random
 using GLMakie, InteractiveDynamics
 using Distributions 
+using LinearAlgebra
 
 
 ## Agent definition
@@ -76,10 +77,10 @@ model = initialize_model()
 # The agent_step function will alternate between a "normal" random walk
 # and a weighted random walk to the attractor. 
 
-function agent_step!(sheep, model, prob_random_walk = 0.5)
+function agent_step!(sheep, model, prob_random_walk = 0.9)
     if rand(model.rng, Uniform(0, 1)) < prob_random_walk
     # "Normal" random walk
-        random_walk!(sheep, model)
+        randomwalk!(sheep, model)
         sheep.energy -= 1
         eat!(sheep, model)
     else
@@ -92,32 +93,15 @@ end
 
 "
 Make a random walk with an 'attractor' which the agents will gravitate towards. 
-An agent in a given position has 8 possible locations to move to. We will compute the
-euclidean distance between those 8 possible locations and the 'attractor', and then 
-compute some weights for moving towards each of those 8 possible locations that depend
-on the euclidean distance to the attractor (closer, higher weights). Once we 
-have the weights, we will do a weighted sample of the possible locations to move to, 
-and then make the move. 
 "
+
 function random_walk_to_attractor(sheep, model)
-    # Get the nearby locations that an agent can move to 
-    possible_locations = [pos for pos in nearby_positions(sheep.pos, model)] 
-    # Compute the euclidean distance of each neighboring position to the attractor
-    eudistance_to_attractor = [euclidean_distance(pos, model.attractor, model) for pos in nearby_positions(sheep.pos, model)]
-    # Define function that computes the probs of moving in each direction
-    f(x) = exp(-x / 3)
-    # Compute the probs of moving in each direction according to the distance to the attractor
-    probs_to_move = f.(eudistance_to_attractor) ./ sum(f.(eudistance_to_attractor))
-    # now we sample the movements using the probs_to_move
-    move_to = wsample(1:length(eudistance_to_attractor), probs_to_move)
-    # and move towards that location
-    move_agent!(sheep, possible_locations[move_to], model)
+    dist = collect(model.attractor .- sheep.pos)
+    direction = dist != [0, 0] ? round.(Int, normalize(dist)) : round.(Int, dist)
+    walk!(sheep, (direction...,), model)
 end
 
-# Show shape of f
-x = 1:10 
-y = exp.(- x / 3)
-lines(x, y)
+
 
 ## Describe
 function eat!(sheep, model)
