@@ -102,43 +102,78 @@ end
 
 
 
-# We will do something different than what is done in flock.jl, we will implement 
-# a 'Move-towards-closest-neighbor' algorithm. 
-# This Move-Towards-closest-neighbor algorithm consists on finding the closest 
-# neighbor, getting the euclidean distance to that agent, and using that 
-# euclidean distance to compute the weights of the possible nearby locations to move to. 
+"""
+    random_walk_gregarious(sheep, model)
 
-"There's some redundancy in this function, can be improved"
+Performs a gregarious random walk for the given `sheep` agent in the `model`. The function first determines
+possible locations the sheep can move to and the neighboring agents within the sheep's visual distance. If there are
+neighboring agents, the sheep moves towards the closest neighbor, considering the Euclidean distance between
+them. The sheep's movement is biased using a probability distribution based on the distance to the closest
+neighbor, where closer locations have higher probabilities.
+
+If there are no neighboring agents, the sheep performs a simple random walk, selecting a neighboring position
+uniformly at random.
+
+# Arguments
+- `sheep`: The Sheep agent to perform the random walk.
+- `model`: The agent-based model containing the sheep and other agents.
+
+# Examples
+```julia
+sheep = model[1] # Get the first sheep agent in the model
+random_walk_gregarious(sheep, model) # Perform a gregarious random walk for the sheep
+```
+"""
 function random_walk_gregarious(sheep, model)
     # Get the nearby locations that an agent can move to
     possible_locations = [pos for pos in nearby_positions(sheep.pos, model)]
+
     # Get the ids of the nearby agents
     neighbor_ids = [ids for ids in nearby_ids(sheep, model, sheep.visual_distance)]
+
     # If there are neighboring agents, do a weighted walk toward the closest
-    if length(neighbor_ids) > 0 
-        # Get the positions of the nearby agents
-        neighbor_positions = [model[ids].pos for ids in nearby_ids(sheep, model, sheep.visual_distance)]
-        # Get the distance to the closest neighbor
-        eudistance_to_neighbors = [euclidean_distance(pos, sheep.pos, model) for pos in neighbor_positions]
-        shortest_eudistance = minimum(eudistance_to_neighbors)
-        # Get the id of the nearest neighbor
-        eudistance_to_ids = Dict(eudistance_to_neighbors .=> neighbor_ids)
-        closest_id = eudistance_to_ids[shortest_eudistance]
+    if length(neighbor_ids) > 0
+        # Find the closest neighbor
+        closest_neighbor_pos = nothing
+        min_distance = Inf
+        for ids in neighbor_ids
+            neighbor_pos = model[ids].pos
+            distance = euclidean_distance(neighbor_pos, sheep.pos, model)
+            if distance < min_distance
+                min_distance = distance
+                closest_neighbor_pos = neighbor_pos
+            end
+        end
+
         # Compute the euclidean distance of each neighboring position to the closest neighbor
-        eudistance_to_closest_neighbor = [euclidean_distance(pos, model[closest_id].pos, model) for pos in nearby_positions(sheep.pos, model)]
+        eudistance_to_closest_neighbor = [euclidean_distance(pos, closest_neighbor_pos, model) for pos in possible_locations]
+
         # Define function that computes the probs of moving in each direction
         f(x) = exp(-x / 3)
+
         # Compute the probs of moving in each direction according to the distance to the attractor
         probs_to_move = f.(eudistance_to_closest_neighbor) ./ sum(f.(eudistance_to_closest_neighbor))
+
         # now we sample the movements using the probs_to_move
         move_to = wsample(1:length(eudistance_to_closest_neighbor), probs_to_move)
+
         # and move towards that location
         move_agent!(sheep, possible_locations[move_to], model)
-    else 
-    # Do a random walk
-      move_agent!(sheep, possible_locations[rand(model.rng, 1:8)], model)  
+    else
+        # Do a random walk
+        move_agent!(sheep, possible_locations[rand(model.rng, 1:8)], model)
     end
 end
+
+
+
+
+
+
+
+
+
+
 
 function eat!(sheep, model)
     if model.fully_grown[sheep.pos...]
