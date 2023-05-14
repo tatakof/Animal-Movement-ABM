@@ -13,11 +13,12 @@
 # Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions"])
 
 ## Load packages
-using Agents, Random
+using Agents, Random, Distributions
 using GLMakie, InteractiveDynamics
-using Distributions 
 using LinearAlgebra
 
+include("../src/agent_actions.jl")
+include("../src/plotting.jl")
 
 ## Agent definition
 @agent Sheep GridAgent{2} begin
@@ -77,41 +78,19 @@ model = initialize_model()
 # The agent_step function will alternate between a "normal" random walk
 # and a weighted random walk to the attractor. 
 
-function agent_step!(sheep, model, prob_random_walk = 0.9)
+function agent_step!(agent, model, prob_random_walk = 0.9)
     if rand(model.rng, Uniform(0, 1)) < prob_random_walk
     # "Normal" random walk
-        randomwalk!(sheep, model)
-        sheep.energy -= 1
-        eat!(sheep, model)
+        randomwalk!(agent, model)
+        agent.energy -= 1
+        eat!(agent, model)
     else
     # Random walk towards attractor
-        random_walk_to_attractor(sheep, model)
-        sheep.energy -= 1
-        eat!(sheep, model)
+        random_walk_to_attractor(agent, model)
+        agent.energy -= 1
+        eat!(agent, model)
     end
 end
-
-"
-Make a random walk with an 'attractor' which the agents will gravitate towards. 
-"
-
-function random_walk_to_attractor(sheep, model)
-    dist = collect(model.attractor .- sheep.pos)
-    direction = dist != [0, 0] ? round.(Int, normalize(dist)) : round.(Int, dist)
-    walk!(sheep, (direction...,), model)
-end
-
-
-
-## Describe
-function eat!(sheep, model)
-    if model.fully_grown[sheep.pos...]
-        sheep.energy += sheep.Δenergy
-        model.fully_grown[sheep.pos...] = false
-    end
-    return
-end
-
 
 ## Model step 
 
@@ -137,46 +116,17 @@ model = initialize_model()
 
 ## Visualize
 
-offset(a) = (-0.1, -0.1*rand(model.rng)) 
-ashape(a) = :circle 
-acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
-
-grasscolor(model) = model.countdown ./ model.regrowth_time
-
-heatkwargs = (
-    colormap = [:white, :green], 
-    colorrange = (0, 1)
-)
-
-plotkwargs = (;
-    ac = acolor,
-    as = 15,
-    am = ashape,
-    offset,
-    scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
-    heatarray = grasscolor,
-    heatkwargs = heatkwargs,
-)
-
-
-model = initialize_model()
-fig, ax, abmobs = abmplot(model;
-    agent_step!, 
-    model_step!, 
-    plotkwargs...
-)
+fig, ax, abmobs = plot_abm_model(model, agent_step!, model_step!)
 fig
 
-
-
 abmvideo(
-    "test.mp4", 
+    "Discrete_v0.2.mp4", 
     model, 
     agent_step!, 
     model_step!; 
     frames = 100, 
     framerate = 8, 
-    plotkwargs..., 
+    # plotkwargs..., 
 )
 
 

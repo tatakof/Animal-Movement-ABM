@@ -119,7 +119,7 @@ function agent_step!(sheep, model)
     if 0 < model.behav_counter[1] < model.counter 
         # 1 == RandomWalk
         if model.behav[1] == 1
-            walk!(sheep, rand, model)
+            randomwalk!(sheep, model)
             eat!(sheep, model)
             model.behav_counter[1] -= 1
         # 2 == Directed Walk
@@ -205,7 +205,7 @@ fig
 
 
 abmvideo(
-    "test.mp4", 
+    "Discrete_v0.4.mp4", 
     model, 
     agent_step!, 
     model_step!; 

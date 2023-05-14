@@ -283,7 +283,7 @@ fig
 
 
 abmvideo(
-    "test.mp4", 
+    "Discrete_v0.6.mp4", 
     model, 
     agent_step!, 
     model_step!; 

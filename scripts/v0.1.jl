@@ -1,4 +1,6 @@
+using DrWatson
 
+@quickactivate "Animal-Movement-ABM"
 
 # v0.1. The space is `GridSpace`. Model has property `grass` (randomly distributed),
 #  with a simple time-based regrowth dynamic. Agents have `energy` and 
@@ -7,14 +9,16 @@
 
 
 ## Install packages
-using Pkg
-Pkg.add(["Agents", "Tables", "Random", "GLMakie", "InteractiveDynamics", "CairoMakie"])
+# using Pkg
+# Pkg.add(["Agents", "Tables", "Random", "GLMakie", "InteractiveDynamics", "CairoMakie"])
 
 ## Load packages
 using Agents, Random
 using InteractiveDynamics
 
-
+## Load functions
+include(srcdir("agent_actions.jl"))
+include(srcdir("plotting.jl"))
 
 ## Agent definition
 @agent Sheep GridAgent{2} begin
@@ -70,52 +74,62 @@ function initialize_model(;
     return model
 end
 
+initialize_model()
 
-## Agent stepping function
-function agent_step!(sheep, model)
-    randomwalk!(sheep, model)
-    sheep.energy -= sheep.movement_cost
-    if sheep.energy < 0 
-        kill_agent!(sheep, model)
+# Agent stepping function
+function agent_step!(agent, model)
+    randomwalk!(agent, model)
+    agent.energy -= agent.movement_cost
+    if agent.energy < 0 
+        kill_agent!(agent, model)
         return 
     end
-    eat!(sheep, model)
-    if rand(model.rng) ≤ sheep.reproduction_prob
-        reproduce!(sheep, model)
+    eat!(agent, model; food = :grass)
+    if rand(model.rng) ≤ agent.reproduction_prob
+        reproduce!(agent, model)
     end
 end
 
 
-function eat!(sheep, model)
-    if model.fully_grown[sheep.pos...]
-        sheep.energy += sheep.Δenergy
-        model.fully_grown[sheep.pos...] = false
+
+
+
+function make_agent_stepping(; eat = false, go_home = true)
+    custom_agent_step! = function(agent, model)  #modified name of anonymous `agent_step!` function to avoid name collision
+        print("hello")
     end
-    return
 end
 
-
-function reproduce!(sheep, model)
-    sheep.energy /= 2
-    id = nextid(model)
-    offspring = Sheep(id, sheep.pos, sheep.energy, sheep.reproduction_prob, sheep.Δenergy, sheep.movement_cost)
-    add_agent_pos!(offspring, model)
-end
+test = make_agent_stepping()
+test()
 
 
-## Model step. 
-function model_step!(model)
-    @inbounds for p in positions(model)
-        if !(model.fully_grown[p...])
-            if model.countdown[p...] ≤ 0 
-                model.fully_grown[p...] = true
-                model.countdown[p...] = model.regrowth_time
-            else
-                model.countdown[p...] -= 1
-            end
+function make_agent_stepping(; eat = false, go_home = true) # avoided anonymous function definition because it raises an error
+    custom_agent_step! = function(agent, model) 
+        if go_home
+            dir = random_direction_towards_home(agent, home, model)
+            walk!(agent, dir, model)
+        end
+        if eat
+            eat!(agent, model, :grass)
         end
     end
+    return custom_agent_step!
 end
+
+custom_agent_step! = make_agent_stepping()
+
+help(custom_agent_step!)
+
+
+println(methods(custom_agent_step!))
+
+using InteractiveUtils
+
+println(@code_lowered custom_agent_step!(agent, model))
+
+step_function1 = make_agent_stepping()
+println(@code_lowered step_function1(agent, model))
 
 
 
@@ -125,45 +139,11 @@ model = initialize_model()
 using CairoMakie
 using GLMakie
 
-## Visualize
-offset(a) = (-0.1, -0.1*rand(model.rng)) 
-ashape(a) = :circle 
-acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
+#
 
-
-grasscolor(model) = model.countdown ./ model.regrowth_time
-
-
-heatkwargs = (
-    colormap = [:white, :green], 
-    colorrange = (0, 1)
-)
-
-plotkwargs = (;
-    ac = acolor,
-    as = 15,
-    am = ashape,
-    offset,
-    scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
-    # heatarray = grasscolor, # this errors 
-    heatkwargs = heatkwargs,
-)
-
-params = Dict(
-    :regrowth_time => 1:1:30, 
-    :move_cost => 1:1:8
-)
-
-model = initialize_model()
-
-fig, ax, abmobs = abmplot(model;
-    agent_step!, 
-    model_step!, 
-    params, 
-    plotkwargs...
-)
-
+fig, ax, abmobs = plot_abm_model(model, agent_step!, model_step!)
 fig
+
 
 abmvideo(
     "test.mp4", 
@@ -174,5 +154,8 @@ abmvideo(
     framerate = 8, 
     # plotkwargs..., 
 )
+
+
+
 
 
