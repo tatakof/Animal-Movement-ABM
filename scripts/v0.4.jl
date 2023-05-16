@@ -100,37 +100,34 @@ model = initialize_model()
 # When a behaviour ends, there's a transition to another behaviour. 
 # The probabilities to transition to another behaviour or to stay in the 
 # same behaviour are uniform.
-"jumps from 10 to 8, thus there's 9 steps instead of 10"
-function agent_step!(sheep, model)
+
+function agent_step!(agent, model)
     if model.behav_counter[1] == model.counter 
         model.behav[1] = sample(1:3)
-        model.behav_counter[1] -= 1 # this may give a silent mistake
         
         # If Directed movement, plan route
         if model.behav[1] == 2
             plan_route!(
-                sheep, 
+                agent, 
                 random_walkable(model, model.pathfinder), 
                 model.pathfinder
             )
         end
     end
 
-    if 0 < model.behav_counter[1] < model.counter 
+    if 0 < model.behav_counter[1] <= model.counter 
         # 1 == RandomWalk
         if model.behav[1] == 1
-            randomwalk!(sheep, model)
-            eat!(sheep, model)
-            model.behav_counter[1] -= 1
+            randomwalk!(agent, model)
+            eat!(agent, model)
         # 2 == Directed Walk
         elseif model.behav[1] == 2
-            move_along_route!(sheep, model, model.pathfinder)
-            model.behav_counter[1] -= 1
+            move_along_route!(agent, model, model.pathfinder)
         # 3 == Rest
         elseif model.behav[1] == 3
-            move_agent!(sheep, sheep.pos, model)
-            model.behav_counter[1] -= 1
+            move_agent!(agent, agent.pos, model)
         end
+        model.behav_counter[1] -= 1
     end
 
     if model.behav_counter[1] == 0
@@ -195,6 +192,7 @@ plotkwargs = (;
 
 
 model = initialize_model()
+
 fig, ax, abmobs = abmplot(model;
     agent_step!, 
     model_step!, 
