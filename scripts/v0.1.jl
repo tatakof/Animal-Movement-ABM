@@ -27,6 +27,7 @@ include(srcdir("model_actions.jl"))
     reproduction_prob::Float64
     Δenergy::Float64
     movement_cost::Float64
+    visual_distance::Float64
 end
 
 ## Model function
@@ -37,6 +38,7 @@ function initialize_model(;
     Δenergy_sheep = 4, 
     sheep_reproduce = 0.004, 
     movement_cost = 1, 
+    visual_distance = 5, 
     seed = 321
 
 )
@@ -61,7 +63,7 @@ function initialize_model(;
     ### Add agents
     for _ = 1:n_sheep
         energy = rand(model.rng, 1:(Δenergy_sheep*5)) - 1
-        add_agent!(Sheep, model, energy, sheep_reproduce, Δenergy_sheep, movement_cost)
+        add_agent!(Sheep, model, energy, sheep_reproduce, Δenergy_sheep, movement_cost, visual_distance)
     end
 
     ### Add grass
@@ -105,4 +107,3 @@ abmvideo(
 
 
 
-"

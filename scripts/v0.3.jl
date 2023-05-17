@@ -95,7 +95,11 @@ The agent_step function will alternate between a "normal" random walk
 """
 
 
-agent_step! = make_agent_stepping(; walk_type = RANDOM_WALK_GREGARIOUS, eat = true, reproduce = true)
+agent_step! = make_agent_stepping(; 
+    walk_type = RANDOM_WALK_GREGARIOUS, 
+    eat = true, 
+    reproduce = true
+)
 
 # function agent_step!(sheep, model, prob_random_walk = 0.3)
 #     if rand(model.rng, Uniform(0, 1)) < prob_random_walk

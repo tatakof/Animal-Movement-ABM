@@ -1,5 +1,4 @@
-
-@enum WalkType RANDOM_WALK RANDOM_WALK_ATTRACTOR RANDOM_WALK_GREGARIOUS
+@enum WalkType RANDOM_WALK RANDOM_WALK_ATTRACTOR RANDOM_WALK_GREGARIOUS ALTERNATED_WALK
 
 
 
@@ -15,8 +14,6 @@ Returns a custom `agent_step!` based on the provided parameters.
 - `eat::Bool`: Whether the agent should eat or not.
 - `reproduce::Bool`: Whether the agent should reproduce or not.
 """
-
-
 
 function make_agent_stepping(; 
     walk_type::WalkType = RANDOM_WALK, 
@@ -39,6 +36,9 @@ function make_agent_stepping(;
             walk_ocurred = true
         elseif walk_type == RANDOM_WALK_GREGARIOUS
             execute_walk!(agent, model; walk_function = random_walk_gregarious, prob_random_walk = prob_random_walk)
+            walk_ocurred = true
+        elseif walk_type == ALTERNATED_WALK
+            execute_walk!(agent, model; walk_function = alternated_walk, prob_random_walk = 0)
             walk_ocurred = true
         end
 
@@ -76,7 +76,7 @@ the agent is killed.
 function reduce_energy!(agent, model, amount)
     agent.energy -= amount
     if agent.energy < 0
-        kill_agent!(agent, model)
+        Agents.kill_agent!(agent, model)
         return
     end
     return
@@ -172,7 +172,57 @@ end
 
 
 
+"""
+    alternated_walk(agent::AbstractAgent, model::ABM)
 
+The function represents an agent's movement behavior in the agent-based model (ABM) `model`. The agent alternates between three types of behaviors: random walk, directed movement towards a random point in the `GridSpace`, and resting. 
+
+The behavior is controlled by a counter parameter in the model (`model.counter`). The agent spends an equal amount of time-steps in each behavior. When the time for a behavior ends (determined by the counter), the agent transitions to another behavior. The probabilities for transitioning to another behavior or staying in the current one are uniform.
+
+The specific behaviors are as follows:
+
+1. **Random Walk**: The agent performs a random walk in the `GridSpace`.
+2. **Directed Walk**: The agent plans a route to a randomly selected walkable point in the `GridSpace` and follows the route.
+3. **Rest**: The agent stays at its current position.
+
+# Arguments
+
+- `agent (AbstractAgent)`: The agent performing the alternated walk.
+- `model (ABM)`: The agent-based model that contains the agent.
+
+"""
+function alternated_walk(agent::AbstractAgent, model::ABM)
+    if model.behav_counter[1] == model.counter 
+        model.behav[1] = sample(1:3)
+        
+        # If Directed movement, plan route
+        if model.behav[1] == 2
+            plan_route!(
+                agent, 
+                random_walkable(model, model.pathfinder), 
+                model.pathfinder
+            )
+        end
+    end
+
+    if 0 < model.behav_counter[1] <= model.counter 
+        # 1 == RandomWalk
+        if model.behav[1] == 1
+            randomwalk!(agent, model)
+        # 2 == Directed Walk
+        elseif model.behav[1] == 2
+            move_along_route!(agent, model, model.pathfinder)
+        # 3 == Rest
+        elseif model.behav[1] == 3
+            move_agent!(agent, agent.pos, model)
+        end
+        model.behav_counter[1] -= 1
+    end
+
+    if model.behav_counter[1] == 0
+        model.behav_counter[1] = model.counter 
+    end
+end
 
 
 

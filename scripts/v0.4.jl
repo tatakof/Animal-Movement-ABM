@@ -14,10 +14,9 @@ Mixed-Agent Ecosystem Pathfinding
 
 
 
-## Install packages
-# using Pkg
-# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions", "Plots"])
 
+using DrWatson
+@quickactivate "Animal-Movement-ABM"
 
 using Agents, Random
 using GLMakie, InteractiveDynamics
@@ -26,9 +25,19 @@ using Distributions
 
 
 
+## Load functions
+include(srcdir("agent_actions.jl"))
+include(srcdir("plotting.jl"))
+include(srcdir("model_actions.jl"))
+
+
+
 @agent Sheep GridAgent{2} begin
     energy::Float64
+    reproduction_prob::Float64
     Δenergy::Float64
+    movement_cost::Float64
+    visual_distance::Float64
 end
 
 
@@ -39,6 +48,9 @@ function initialize_model(;
     griddims = (80, 80), 
     regrowth_time = 30, 
     Δenergy_sheep = 4, 
+    sheep_reproduce = 0.004, 
+    movement_cost = 1, 
+    visual_distance = 5, 
     seed = 321, 
     counter = 50, 
 
@@ -68,7 +80,7 @@ function initialize_model(;
     ### Add agents
     for _ = 1:n_sheep
         energy = rand(model.rng, 1:(Δenergy_sheep*5)) - 1
-        add_agent!(Sheep, model, energy, Δenergy_sheep)
+        add_agent!(Sheep, model, energy, sheep_reproduce, Δenergy_sheep, movement_cost, visual_distance)
     end
 
     ### Add grass
@@ -88,117 +100,25 @@ function initialize_model(;
     return model
 end
 
-model = initialize_model()
 
 
 
-
-
-# Agents will alternate between a random walk, a directed movement towards a random point in the 
-# `GridSpace` and a resting behaviour. There will be a `counter` parameter that 
-# dictates the amount of time-steps that each agent spends in each behaviour. 
-# When a behaviour ends, there's a transition to another behaviour. 
-# The probabilities to transition to another behaviour or to stay in the 
-# same behaviour are uniform.
-
-function agent_step!(agent, model)
-    if model.behav_counter[1] == model.counter 
-        model.behav[1] = sample(1:3)
-        
-        # If Directed movement, plan route
-        if model.behav[1] == 2
-            plan_route!(
-                agent, 
-                random_walkable(model, model.pathfinder), 
-                model.pathfinder
-            )
-        end
-    end
-
-    if 0 < model.behav_counter[1] <= model.counter 
-        # 1 == RandomWalk
-        if model.behav[1] == 1
-            randomwalk!(agent, model)
-            eat!(agent, model)
-        # 2 == Directed Walk
-        elseif model.behav[1] == 2
-            move_along_route!(agent, model, model.pathfinder)
-        # 3 == Rest
-        elseif model.behav[1] == 3
-            move_agent!(agent, agent.pos, model)
-        end
-        model.behav_counter[1] -= 1
-    end
-
-    if model.behav_counter[1] == 0
-        model.behav_counter[1] = model.counter 
-    end
-
-end
-
-
-function eat!(sheep, model)
-    if model.fully_grown[sheep.pos...]
-        sheep.energy += sheep.Δenergy
-        model.fully_grown[sheep.pos...] = false
-    end
-    return
-end
-
-
-## Model step. 
-function model_step!(model)
-    @inbounds for p in positions(model)
-        if !(model.fully_grown[p...])
-            if model.countdown[p...] ≤ 0 
-                model.fully_grown[p...] = true
-                model.countdown[p...] = model.regrowth_time
-            else
-                model.countdown[p...] -= 1
-            end
-        end
-    end
-end
-
+## Define agent_step!
+agent_step! = make_agent_stepping(; 
+    walk_type = ALTERNATED_WALK,
+    eat = true, 
+    reproduce = true
+)
 
 
 ## Initialize model
 model = initialize_model()
 
 
-
 ## Visualize
-
-offset(a) = (-0.1, -0.1*rand(model.rng)) 
-ashape(a) = :circle 
-acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
-
-grasscolor(model) = model.countdown ./ model.regrowth_time
-
-heatkwargs = (
-    colormap = [:white, :green], 
-    colorrange = (0, 1)
-)
-
-plotkwargs = (;
-    ac = acolor,
-    as = 15,
-    am = ashape,
-    offset,
-    scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
-    heatarray = grasscolor,
-    heatkwargs = heatkwargs,
-)
-
-
-model = initialize_model()
-
-fig, ax, abmobs = abmplot(model;
-    agent_step!, 
-    model_step!, 
-    plotkwargs...
-)
+fig, ax, abmobs = plot_abm_model(model, agent_step!, model_step!)
 fig
+
 
 
 
@@ -209,5 +129,5 @@ abmvideo(
     model_step!; 
     frames = 100, 
     framerate = 8, 
-    plotkwargs..., 
+    # plotkwargs..., 
 )
