@@ -1,5 +1,7 @@
+"should I make a make_model_step()???"
 
 
+" add optional parameter to make_agent_stepping() that determines the prob of random walk"
 
 # - [ ] v0.3. Add sheep gregarious behavior, in a similar way as implemented in the 
 # flocking [example](https://juliadynamics.github.io/Agents.jl/stable/examples/flock/) 
@@ -9,16 +11,22 @@
 
 
 ## Load packages
+using DrWatson
+@quickactivate "Animal-Movement-ABM"
 using Agents, Random, Distributions
 using GLMakie, InteractiveDynamics
 
-include("../src/agent_actions.jl")
-include("../src/plotting.jl")
+include(srcdir("agent_actions.jl"))
+include(srcdir("plotting.jl"))
+include(srcdir("model_actions.jl"))
+
 
 ## Agent definition
 @agent Sheep GridAgent{2} begin
     energy::Float64
+    reproduction_prob::Float64
     Δenergy::Float64
+    movement_cost::Float64
     visual_distance::Float64
 end
 
@@ -28,6 +36,8 @@ function initialize_model(;
     griddims = (80, 80), 
     regrowth_time = 30, 
     Δenergy_sheep = 4, 
+    sheep_reproduce = 0.004, 
+    movement_cost = 1, 
     visual_distance = 5, 
     seed = 321, 
 
@@ -58,13 +68,15 @@ function initialize_model(;
             Sheep, 
             model, 
             energy, 
-            Δenergy_sheep, 
+            sheep_reproduce, 
+            Δenergy_sheep,
+            movement_cost,  
             visual_distance
         )
     end
 
     ### Add grass
-    for p in positions(model)
+    for p in positions(model) # This could be abstracted into a function
         fully_grown = rand(model.rng, Bool)
         countdown = fully_grown ? regrowth_time : rand(model.rng, 1:regrowth_time) - 1 
         model.countdown[p...] = countdown 
@@ -75,7 +87,6 @@ function initialize_model(;
 end
 
 
-model = initialize_model()
 
 
 """
@@ -83,36 +94,26 @@ The agent_step function will alternate between a "normal" random walk
     and a gregarious random walk. 
 """
 
-function agent_step!(sheep, model, prob_random_walk = 0.3)
-    if rand(model.rng, Uniform(0, 1)) < prob_random_walk
-    # "Normal" random walk
-        randomwalk!(sheep, model)
-        sheep.energy -= 1
-        eat!(sheep, model)
-    else
-    # Random walk towards attractor
-        random_walk_gregarious(sheep, model)
-        sheep.energy -= 1
-        eat!(sheep, model)
-    end
-end
+
+agent_step! = make_agent_stepping(; walk_type = RANDOM_WALK_GREGARIOUS, eat = true, reproduce = true)
+
+# function agent_step!(sheep, model, prob_random_walk = 0.3)
+#     if rand(model.rng, Uniform(0, 1)) < prob_random_walk
+#     # "Normal" random walk
+#         randomwalk!(sheep, model)
+#         sheep.energy -= 1
+#         eat!(sheep, model)
+#     else
+#     # Random walk towards attractor
+#         random_walk_gregarious(sheep, model)
+#         sheep.energy -= 1
+#         eat!(sheep, model)
+#     end
+# end
 
 
 
 
-## Model step 
-function model_step!(model)
-    @inbounds for p in positions(model)
-        if !(model.fully_grown[p...])
-            if model.countdown[p...] ≤ 0 
-                model.fully_grown[p...] = true
-                model.countdown[p...] = model.regrowth_time
-            else
-                model.countdown[p...] -= 1
-            end
-        end
-    end
-end
 
 
 
@@ -128,13 +129,13 @@ fig
 
 
 abmvideo(
-    "test.mp4", 
+    "Discrete_v0.3.mp4", 
     model, 
     agent_step!, 
     model_step!; 
     frames = 100, 
     framerate = 8, 
-    plotkwargs..., 
+    # plotkwargs..., 
 )
 
 
