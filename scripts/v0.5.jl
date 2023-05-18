@@ -7,23 +7,32 @@ the `agent_step!` function.
 
 "
 
-## Install packages
-# using Pkg
-# Pkg.add(["Tables", "Random", "GLMakie", "InteractiveDynamics", "Distributions", "Plots", "ImageMagick", "FileIO"])
 
 ## Load packages
+using DrWatson
+@quickactivate "Animal-Movement-ABM"
 using Agents, Random
 using GLMakie, InteractiveDynamics
 import ImageMagick
 using FileIO: load
 using Agents.Pathfinding
 
+
+
+
+## Load functions
+include(srcdir("agent_actions.jl"))
+include(srcdir("plotting.jl"))
+include(srcdir("model_actions.jl"))
+
+
 ## Agent definition
 @agent Sheep GridAgent{2} begin
     energy::Float64
-    # reproduction_prob::Float64
+    reproduction_prob::Float64
     Δenergy::Float64
     movement_cost::Float64
+    visual_distance::Float64
 end
 
 ## Model function
@@ -31,8 +40,10 @@ function initialize_model(;
     n_sheep = 40, 
     regrowth_time = 30, 
     Δenergy_sheep = 4, 
-    move_cost = 1, 
+    sheep_reproduce = 0.004, 
+    movement_cost = 1, 
     water_level = 1, 
+    visual_distance = 5, 
     mountain_level = 18, 
     seed = 321
 
@@ -73,7 +84,7 @@ function initialize_model(;
         regrowth_time = regrowth_time, 
         elevation = elevation, 
         land_walkmap = land_walkmap, 
-        landfinder = AStar(space; walkmap = land_walkmap)
+        pathfinder = AStar(space; walkmap = land_walkmap)
     )
 
     
@@ -89,10 +100,12 @@ function initialize_model(;
         add_agent_pos!(
             Sheep(
                 nextid(model), 
-                random_walkable(model, model.landfinder), 
+                random_walkable(model, model.pathfinder), 
                 energy, 
+                sheep_reproduce, 
                 Δenergy_sheep, 
-                move_cost
+                movement_cost, 
+                visual_distance
             ), 
             model
         )
@@ -111,52 +124,14 @@ function initialize_model(;
     return model
 end
 
-model = initialize_model()
 
 ## Agent stepping function
-
-# Make a random walk taking into account the positions agents can
-# and cannot take
-
-function agent_step!(sheep, model)
-    nearby_pos = [pos for pos in nearby_walkable(sheep.pos, model, AStar(model.space; walkmap = model.land_walkmap), 1)]
-    move_agent!(sheep, nearby_pos[rand(model.rng, 1:length(nearby_pos))], model)
-    sheep.energy -= sheep.movement_cost
-    if sheep.energy < 0 
-        kill_agent!(sheep, model)
-        return
-    end
-    eat!(sheep, model)
-end
-
-
-function eat!(sheep, model)
-    if model.fully_grown[sheep.pos...]
-        sheep.energy += sheep.Δenergy
-        model.fully_grown[sheep.pos...] = false
-    end
-    return
-end
-
-
+# Make a random walk taking into account the positions agents can and cannot take
+agent_step! = make_agent_stepping(; walk_type = RANDOM_WALKMAP, eat = true, reproduce = true)
 
 
 ## Model step. 
-function model_step!(model)
-    @inbounds for p in positions(model)
-        if model.land_walkmap[p...] == 1
-            if !(model.fully_grown[p...])
-                if model.countdown[p...] ≤ 0 
-                    model.fully_grown[p...] = true
-                    model.countdown[p...] = model.regrowth_time
-                else
-                    model.countdown[p...] -= 1
-                end
-            end
-        end
-    end
-end
-
+model_step! = make_model_stepping(; walkmap = true)
 
 
 ## Initialize model
@@ -165,35 +140,7 @@ model = initialize_model()
 
 
 ## Visualize
-
-offset(a) = (-0.1, -0.1*rand(model.rng)) 
-ashape(a) = :circle 
-acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
-
-
-grasscolor(model) = model.countdown ./ model.regrowth_time
-
-heatkwargs = (
-    colormap = [:white, :green], 
-    colorrange = (0, 1)
-)
-
-plotkwargs = (;
-    ac = acolor,
-    as = 15,
-    am = ashape,
-    offset,
-    scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
-    heatarray = grasscolor,
-    heatkwargs = heatkwargs,
-)
-
-model = initialize_model()
-fig, ax, abmobs = abmplot(model;
-    agent_step!, 
-    model_step!, 
-    plotkwargs...
-)
+fig, ax, abmobs = plot_abm_model(model, agent_step!, model_step!)
 fig
 
 

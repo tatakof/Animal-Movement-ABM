@@ -2,25 +2,32 @@
 # - [ ] v0.6. Use the `elevation` model property as a cost metric
 #  for the path finding.  
 
-## Install packages
-using Pkg
-Pkg.add(["Agents", "Tables", "Random", "CairoMakie", "InteractiveDynamics", "Distributions", "Plots", "ImageMagick", "FileIO"])
 
-using GLMakie
 ## Load packages
+using DrWatson
+@quickactivate "Animal-Movement-ABM"
 using Agents, Random
-using CairoMakie, InteractiveDynamics
+using GLMakie, InteractiveDynamics
 import ImageMagick
 using FileIO: load
 using Agents.Pathfinding
 using Distributions
 
+
+
+## Load functions
+include(srcdir("agent_actions.jl"))
+include(srcdir("plotting.jl"))
+include(srcdir("model_actions.jl"))
+
+
 ## Agent definition
 @agent Sheep GridAgent{2} begin
     energy::Float64
-    # reproduction_prob::Float64
+    reproduction_prob::Float64
     Δenergy::Float64
     movement_cost::Float64
+    visual_distance::Float64
 end
 
 
@@ -30,8 +37,10 @@ function initialize_model(;
     n_sheep = 40, 
     regrowth_time = 30, 
     Δenergy_sheep = 4, 
-    move_cost = 1, 
+    sheep_reproduce = 0.004, 
+    movement_cost = 1, 
     water_level = 1, 
+    visual_distance = 5, 
     mountain_level = 18, 
     seed = 321, 
     counter = 50, 
@@ -41,12 +50,12 @@ function initialize_model(;
     "juliadynamics/master/videos/agents/runners_heightmap.jpg"
     ## download and load the heightmap. the grayscale value is converted to `float64` and
     ## scaled from 1 to 40
-    elevation = floor.(int, convert.(float64, load(download(heightmap_url))) * 39) .+ 1
+    elevation = floor.(Int, convert.(Float64, load(download(heightmap_url))) * 39) .+ 1
     ## the x and y dimensions of the pathfinder are that of the heightmap
     dims = (size(elevation))
     ## the region of the map that is accessible to sheep is defined using `bitarrays`
-    land_walkmap = bitarray(falses(dims...))
-    water_map = bitarray(falses(dims...))
+    land_walkmap = BitArray(falses(dims...))
+    water_map = BitArray(falses(dims...))
 
     # land walk map will be between `water_level` and `mountain_level`
     for i = 1:dims[1], j = 1:dims[2]
@@ -75,7 +84,7 @@ function initialize_model(;
         counter = counter,  
         elevation = elevation, 
         land_walkmap = land_walkmap, 
-        landfinder = AStar(
+        pathfinder = AStar(
             space; 
             walkmap = land_walkmap, 
             # Use the `elevation` model property as a cost metric
@@ -97,10 +106,12 @@ function initialize_model(;
         add_agent_pos!(
             Sheep(
                 nextid(model), 
-                random_walkable(model, model.landfinder), 
+                random_walkable(model, model.pathfinder), 
                 energy, 
+                sheep_reproduce, 
                 Δenergy_sheep, 
-                move_cost
+                movement_cost, 
+                visual_distance
             ), 
             model
         )
@@ -125,96 +136,22 @@ end
 
 model = initialize_model()
 
+
 ## Agent stepping function
-function agent_step!(sheep, model)
-    nearby_pos = [pos for pos in nearby_walkable(sheep.pos, model, AStar(model.space; walkmap = model.land_walkmap), 1)]
-    move_agent!(sheep, nearby_pos[rand(model.rng, 1:length(nearby_pos))], model)
-    sheep.energy -= sheep.movement_cost
-    if sheep.energy < 0 
-        kill_agent!(sheep, model)
-        return
-    end
-    eat!(sheep, model)
-end
+# Make an "alternated walk" using `elevation` model property as a cost metric
+agent_step! = make_agent_stepping(; walk_type = ALTERNATED_WALK, eat = true, reproduce = true)
 
 
 
 
-# Agents will alternate between a random walk, a directed movement towards a random point in the 
-# `GridSpace` and a resting behaviour. There will be a `counter` parameter that 
-# dictates the amount of time-steps that each agent spends in each behaviour. 
-# When a behaviour ends, there's a transition to another behaviour. 
-# The probabilities to transition to another behaviour or to stay in the 
-# same behaviour are uniform.
-"jumps from 10 to 8, thus there's 9 steps instead of 10"
-function agent_step!(sheep, model)
-    if model.behav_counter[1] == model.counter 
-        model.behav[1] = sample(1:3)
-        model.behav_counter[1] -= 1 # this may give a silent mistake
-        
-        # If Directed movement, plan route
-        if model.behav[1] == 2
-            plan_route!(
-                sheep, 
-                random_walkable(model, model.landfinder), 
-                model.landfinder
-            )
-        end
-    end
 
 
-    if 0 < model.behav_counter[1] < model.counter 
-        # 1 == RandomWalk
-        if model.behav[1] == 1
-            randomwalk!(sheep, model)
-            eat!(sheep, model)
-            model.behav_counter[1] -= 1
-        # 2 == Directed Walk
-        elseif model.behav[1] == 2
-            move_along_route!(sheep, model, model.landfinder)
-            model.behav_counter[1] -= 1
-        # 3 == Rest
-        elseif model.behav[1] == 3
-            move_agent!(sheep, sheep.pos, model)
-            model.behav_counter[1] -= 1
-        end
-    end
-
-    if model.behav_counter[1] == 0
-        model.behav_counter[1] = model.counter 
-    end
-
-end
-
-
-## Describe
-function eat!(sheep, model)
-    if model.fully_grown[sheep.pos...]
-        sheep.energy += sheep.Δenergy
-        model.fully_grown[sheep.pos...] = false
-    end
-    return
-end
 
 
 
 
 ## Model step. 
-
-function model_step!(model)
-    @inbounds for p in positions(model)
-        if model.land_walkmap[p...] == 1
-            if !(model.fully_grown[p...])
-                if model.countdown[p...] ≤ 0 
-                    model.fully_grown[p...] = true
-                    model.countdown[p...] = model.regrowth_time
-                else
-                    model.countdown[p...] -= 1
-                end
-            end
-        end
-    end
-end
+model_step! = make_model_stepping(; walkmap = true)
 
 
 
@@ -224,45 +161,13 @@ model = initialize_model()
 
 
 ## Visualize
-
-# To view our starting population, we can build an overview plot using [`abmplot`](@ref).
-# We define the plotting details for the wolves and sheep:
-offset(a) = (-0.1, -0.1*rand(model.rng)) 
-ashape(a) = :circle 
-acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8) 
-
-
-# and instruct [`abmplot`](@ref) how to plot grass as a heatmap:
-grasscolor(model) = model.countdown ./ model.regrowth_time
-# homecolor(model) = model.home
-# and finally define a colormap for the grass:
-heatkwargs = (
-    colormap = [:white, :green], 
-    colorrange = (0, 1)
-)
-
-# and put everything together and give it to [`abmplot`](@ref)
-plotkwargs = (;
-    ac = acolor,
-    as = 15,
-    am = ashape,
-    offset,
-    scatterkwargs = (strokewidth = 1.0, strokecolor = :black),
-    heatarray = grasscolor,
-    heatkwargs = heatkwargs,
-)
-
-model = initialize_model()
-fig, ax, abmobs = abmplot(model;
-    agent_step!, 
-    model_step!, 
-    plotkwargs...
-)
+fig, ax, abmobs = plot_abm_model(model, agent_step!, model_step!)
 fig
 
 
 # test fig
 static_preplot!(ax, model) = scatter!(ax, (128, 409); color = (:red, 50), marker = 'x')
+
 fig, ax, abmobs = abmplot(
     model;
     agent_step!, 
@@ -271,7 +176,7 @@ fig, ax, abmobs = abmplot(
     ac = :black, 
     as = 8, 
     scatterkwargs = (strokecolor = :white, strokewidth = 2), 
-    heatarray = model -> penaltymap(model.landfinder), 
+    heatarray = model -> penaltymap(model.pathfinder), 
     heatkwargs = (colormap  = :terrain,), 
     static_preplot!, 
 )

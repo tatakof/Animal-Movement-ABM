@@ -22,6 +22,7 @@ fig, ax, abmobs = plot_abm_model(model, agent_step!, model_step!)
 
 
 function plot_abm_model(model::ABM, agent_step!::Function, model_step!::Function)
+
     offset(a) = (-0.1, -0.1*rand(model.rng))
     ashape(a) = :circle
     acolor(a) = RGBAf(1.0, 1.0, 1.0, 0.8)

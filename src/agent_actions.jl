@@ -1,4 +1,4 @@
-@enum WalkType RANDOM_WALK RANDOM_WALK_ATTRACTOR RANDOM_WALK_GREGARIOUS ALTERNATED_WALK
+@enum WalkType RANDOM_WALK RANDOM_WALK_ATTRACTOR RANDOM_WALK_GREGARIOUS ALTERNATED_WALK RANDOM_WALKMAP
 
 
 
@@ -39,6 +39,9 @@ function make_agent_stepping(;
             walk_ocurred = true
         elseif walk_type == ALTERNATED_WALK
             execute_walk!(agent, model; walk_function = alternated_walk, prob_random_walk = 0)
+            walk_ocurred = true
+        elseif walk_type == RANDOM_WALKMAP
+            execute_walk!(agent, model; walk_function = random_walkmap, prob_random_walk = 0)
             walk_ocurred = true
         end
 
@@ -166,6 +169,14 @@ function reproduce!(agent::AbstractAgent, model::ABM)
     offspring = Sheep(id, agent.pos, agent.energy, agent.reproduction_prob, agent.Δenergy, agent.movement_cost, agent.visual_distance)
 
     add_agent_pos!(offspring, model)
+end
+
+
+
+function random_walkmap(agent::AbstractAgent, model::ABM)
+    nearby_pos = [pos for pos in nearby_walkable(agent.pos, model, AStar(model.space; walkmap = model.land_walkmap), 1)]
+    move_agent!(agent, nearby_pos[rand(model.rng, 1:length(nearby_pos))], model)
+
 end
 
 

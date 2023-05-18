@@ -84,12 +84,14 @@ end
 
 
 
+# Agent stepping function
 # The agent_step function will alternate between a "normal" random walk
 # and a weighted random walk to the attractor. 
-
 agent_step! = make_agent_stepping(; walk_type = RANDOM_WALK_ATTRACTOR, eat = true, reproduce = true)
 
 
+# Model stepping function
+model_step! = make_model_stepping()
 
 
 ## Initialize model

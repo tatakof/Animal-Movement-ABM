@@ -79,10 +79,10 @@ end
 
 
 # Agent stepping function
-
 agent_step! = make_agent_stepping(;walk_type = RANDOM_WALK, eat = true, reproduce = true)
 
-
+# Model stepping function
+model_step! = make_model_stepping()
 
 ## Initialize model
 model = initialize_model()
