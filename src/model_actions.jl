@@ -1,21 +1,18 @@
 """
-    make_model_stepping()
+    grass_growth_dynamics(;walkmap::Bool = false)
 
-Creates a customized model step function `custom_model_step!` for an agent-based model (ABM). The function controls the behaviour of model properties. 
+Creates a custom model_step! function for an Agent-Based Model (ABM) simulating the growth dynamics of grass. 
 
+The returned function operates on each position `p` in the model, managing grass growth based on walkability of land (if `walkmap` is true), and countdown/regrowth times.
+
+# Arguments
+- `walkmap::Bool=false`: Controls whether only walkable positions are considered for grass growth.
 
 # Returns
-- `custom_model_step! (function)`: A function that defines the model stepping behavior. This function takes an ABM as its only argument.
-
-# Example
-
-```julia
-model_step! = make_model_stepping()
-model_step!(model)
-```
+- A custom model_step! function for the ABM.
 """
 
-function make_model_stepping(;
+function grass_growth_dynamics(;
     walkmap::Bool = false 
 )
     custom_model_step! = function(model::ABM)
@@ -34,39 +31,4 @@ function make_model_stepping(;
     return custom_model_step!
 end
 
-
-
-
-# function make_model_stepping(
-#     pathfinding::Bool = true
-# )
-#     custom_model_step! = function(model::ABM)
-
-#     if pathfinding
-#         @inbounds for p in positions(model)
-#             if model.land_walkmap[p...] == 1
-#                 if !(model.fully_grown[p...])
-#                     if model.countdown[p...] ≤ 0 
-#                         model.fully_grown[p...] = true
-#                         model.countdown[p...] = model.regrowth_time
-#                     else
-#                         model.countdown[p...] -= 1
-#                     end
-#                 end
-#             end
-#         end
-#     else 
-#         @inbounds for p in positions(model)
-#             if !(model.fully_grown[p...])
-#                 if model.countdown[p...] ≤ 0 
-#                     model.fully_grown[p...] = true
-#                     model.countdown[p...] = model.regrowth_time
-#                 else
-#                     model.countdown[p...] -= 1
-#                 end
-#             end
-#         end
-#     end
-#     return custom_model_step!
-# end
 
