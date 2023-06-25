@@ -1,0 +1,1 @@
+should I make a make_model_initialization() function?

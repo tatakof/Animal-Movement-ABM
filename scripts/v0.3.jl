@@ -1,7 +1,4 @@
-"should I make a make_model_step()???"
 
-
-" add optional parameter to make_agent_stepping() that determines the prob of random walk"
 
 # - [ ] v0.3. Add sheep gregarious behavior, in a similar way as implemented in the 
 # flocking [example](https://juliadynamics.github.io/Agents.jl/stable/examples/flock/) 
@@ -30,13 +27,14 @@ include(srcdir("model_actions.jl"))
     visual_distance::Float64
 end
 
+
 ## Model function
 function initialize_model(;
     n_sheep = 40, 
     griddims = (80, 80), 
     regrowth_time = 30, 
     Δenergy_sheep = 4, 
-    sheep_reproduce = 0.004, 
+    sheep_reproduce = 0.001, 
     movement_cost = 1, 
     visual_distance = 5, 
     seed = 321, 
@@ -44,7 +42,7 @@ function initialize_model(;
 )
 
     rng = MersenneTwister(seed)
-    space = GridSpace(griddims, periodic = true)
+    space = GridSpace(griddims, periodic = true, metric = :chebyshev)
 
     ### Model properties
     properties = (
@@ -94,26 +92,17 @@ The agent_step function will alternate between a "normal" random walk
     and a gregarious random walk. 
 """
 
-
+# Agent stepping function
 agent_step! = make_agent_stepping(; 
     walk_type = RANDOM_WALK_GREGARIOUS, 
     eat = true, 
-    reproduce = true
+    reproduce = true, 
+    prob_random_walk = 0.1
 )
 
-# function agent_step!(sheep, model, prob_random_walk = 0.3)
-#     if rand(model.rng, Uniform(0, 1)) < prob_random_walk
-#     # "Normal" random walk
-#         randomwalk!(sheep, model)
-#         sheep.energy -= 1
-#         eat!(sheep, model)
-#     else
-#     # Random walk towards attractor
-#         random_walk_gregarious(sheep, model)
-#         sheep.energy -= 1
-#         eat!(sheep, model)
-#     end
-# end
+
+# Model stepping function
+model_step! = make_model_stepping()
 
 
 

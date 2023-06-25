@@ -6,23 +6,32 @@
 
 
 
+## Activate project
+using DrWatson
+@quickactivate "Animal-Movement-ABM"
 
-using Agents, LinearAlgebra
-using Random
-# import InteractiveDynamics
+## Load packages
+using Agents, Random
 using InteractiveDynamics
-using FileIO: load
-using Distributions
 using GLMakie
 
+## Load functions
+include(srcdir("agent_actions.jl"))
+include(srcdir("plotting.jl"))
+include(srcdir("model_actions.jl"))
+
+
 @agent Sheep ContinuousAgent{2} begin
+    energy::Float64
+    reproduction_prob::Float64
+    Δenergy::Float64
     speed::Float64
 end
 
 
 
 function initialize_model(;
-    n_sheep = 100,  
+    n_sheep = 40,  
     extent = (100., 100.),
     speed = 1.0, 
     dt = 0.1, 
@@ -57,8 +66,6 @@ function initialize_model(;
         end
     end
 
-
-
     rng = MersenneTwister(seed)
 
     space = ContinuousSpace(extent)
@@ -70,8 +77,6 @@ function initialize_model(;
         rand(rng, dims[1:2]...) .< ((grass_level .- heightmap) ./ (grass_level - water_level)),
     )
 
-
-
     properties = (
         speed = speed, 
         dt = dt, 
@@ -80,7 +85,6 @@ function initialize_model(;
     )
 
     model = ABM(Sheep, space; rng, properties)
-
 
     for _ in 1:n_sheep
         vel = (-1.0, -1.0) #Tuple(rand(model.rng, 2) * 2 .- 1)
@@ -91,7 +95,6 @@ function initialize_model(;
             speed
         )
     end
-
 
     ### Add grass
     # for p in positions(model)
@@ -121,7 +124,7 @@ end
 const sheep_polygon = Polygon(Point2f[(-0.5, -0.5), (1, 0), (-0.5, 0.5)])
 function sheep_marker(b::Sheep)
     φ = atan(b.vel[2], b.vel[1]) #+ π/2 + π
-    scale(rotate2D(sheep_polygon, φ), 2)
+    InteractiveDynamics.scale(rotate2D(sheep_polygon, φ), 2)
 end
 
 

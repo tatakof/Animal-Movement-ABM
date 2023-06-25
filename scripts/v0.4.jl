@@ -57,7 +57,7 @@ function initialize_model(;
 )
 
     rng = MersenneTwister(seed)
-    space = GridSpace(griddims, periodic = true)
+    space = GridSpace(griddims, periodic = true, metric = :chebyshev)
 
     ### Model properties
     properties = (
@@ -109,6 +109,9 @@ agent_step! = make_agent_stepping(;
     eat = true, 
     reproduce = true
 )
+
+# Model stepping function
+model_step! = make_model_stepping()
 
 
 ## Initialize model

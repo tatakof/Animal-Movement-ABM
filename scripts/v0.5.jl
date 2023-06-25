@@ -75,7 +75,7 @@ function initialize_model(;
     end
 
     rng = MersenneTwister(seed)
-    space = GridSpace(dims, periodic = true)
+    space = GridSpace(dims, periodic = true, metric = :chebyshev)
 
     ### Model properties
     properties = (

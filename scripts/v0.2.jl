@@ -39,7 +39,7 @@ function initialize_model(;
     griddims = (80, 80), 
     regrowth_time = 30, 
     Δenergy_sheep = 4, 
-    sheep_reproduce = 0.004, 
+    sheep_reproduce = 0.001, 
     movement_cost = 1, 
     visual_distance = 5, 
     seed = 321
@@ -47,7 +47,7 @@ function initialize_model(;
 )
 
     rng = MersenneTwister(seed)
-    space = GridSpace(griddims, periodic = true)
+    space = GridSpace(griddims, periodic = false, metric = :chebyshev)
 
     ### Model properties
     properties = (
