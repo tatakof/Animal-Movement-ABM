@@ -4,7 +4,7 @@
 
 
 """
-    make_agent_stepping(; walk_type::WalkType = RANDOM_WALK, eat::Bool = true, reproduce::Bool = true)
+    herbivore_dynamics(; walk_type::WalkType = RANDOM_WALK, eat::Bool = true, reproduce::Bool = true)
 
 Returns a custom `agent_step!` based on the provided parameters.
 
@@ -15,7 +15,7 @@ Returns a custom `agent_step!` based on the provided parameters.
 - `reproduce::Bool`: Whether the agent should reproduce or not.
 """
 
-function make_agent_stepping(; 
+function herbivore_dynamics(; 
     walk_type::WalkType = RANDOM_WALK, 
     eat::Bool = true, 
     reproduce::Bool = true
