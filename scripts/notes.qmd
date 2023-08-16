@@ -1,0 +1,133 @@
+generalidad deseable: distancia temporal y espacial de eventos para que haya transmision. Funcion que diga como cambia la prob de transmision en function del tiempo y distancia entre agentes. 
+
+Potencialmente contemplar anisotropía del espacio
+
+
+dado que estoy en un tipo de comportamiento
+
+
+de una distribucion dice cuanto tiempo me muevo en una direccion # Ponerle un counter al agente?
+
+de otra distribucion dice en que velocidad me muevo. 
+
+
+mas simple: vel constante pero varia entre comportamientos. Distribucion de waiting times tambien cambia por comportamiento. 
+
+
+
+Waiting times es la cant de dts que pasas en un angulo en particular.
+
+
+
+
+Markers: 
+size of the markers could be internal state. #  as(a) = 0.5*a.internal_state
+shape of the markers could be behaviour # am(a) = a.status == :S ? :circle : a.status == :I ? :diamond : :rect
+color of the markers could be infectious state. # ac(a) = a.status == :S ? "#2b2b33" : a.status == :I ? "#bf2642" : "#338c54"
+
+
+
+
+Parameters to optimize with blackbox optim? 
+- Time when to vaccinate? # do vaccines have a cost?
+- Fitness
+- Money for farmers?
+
+
+
+
+
+What happens if we deny the access to a spot with fasciola?
+
+
+
+Dist de cambio de comportamiento?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Notes from Hooten et al 2010. 
+
+More recently, Tracey, Zhu, and Crooks (2005) presented a model-based egocentric approach that links turn angles and move distances to known landscape features, and they are in the process of generalizing these methods to accommodate covariates and multi-animal inference using artificial neural networks (Tracey, Zhu, and Crooks 2010).
+
+
+
+
+
+
+Similar a gillespie -> discrete event simulation
+
+
+
+ver DiscreteEvents.jl, hablarlo con George. 
+
+
+Olvidarnos del dt de Agents, nos permitiria 
+
+
+
+Cuestiones dt: 
+- Gracia de 
+
+
+
+
+La idea es que vaya hacer ceirta activdad por 
+
+
+ornstein ullenbeck es un proceso estocastico en tiempo continuo que basicamente te da una distr normal bivariada si fuese en un esppacio. 
+
+Si usas ornstein ullenbeck para modelar la velocidad. 
+
+
+
+La parte mas importante de movimiento colectivo es que no se dispersen los bichos. 
+
+
+
+
+
+
+
+Decisiones de codigo/modelo: cuestiones de habitat selection (ver paper en el que esta john fiber y abgar (no son primeros autores) sobre habitat selection. El paper es una especie de How-To, tiene buena interpretacion y fundamentos. ver este paper https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2656.13441) y de collective movement (que modelo se va a implementar de esto se va a charlar con Fernando Peruani). 
+
+Escribir que iria en cada capitulo relacionado a los modelos basados en agentes. Pensando en capitulos y en papers a publicar. 
+Algo para el segundo cap tal vez es lo de las graph neural networks para hacer ABC con los datos de las ovejas. El problema con esto es que no es trivial, podrias hacer un phd con esto. Tal vez podes hacer algo como lo que hizo sofi, que lo hizo en un espacio homogeneo. Hacerlo en un espacio heterogeneo ya seria algo bueno como para publicar en algun lado. 
+
+
+
+
+6 de septiembre llegaria a escocia. 
+
+
+
+
+
+
+
+
+
+
+Cuestiones del decodificador: 
+usariamos ambos datasets, el de sofi y el de mercedes. 
+
+
+Tensorflow usa colin. 
+
+
+
+
+
+
+
+

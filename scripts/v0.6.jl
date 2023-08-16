@@ -139,7 +139,7 @@ model = initialize_model()
 
 ## Agent stepping function
 # Make an "alternated walk" using `elevation` model property as a cost metric
-agent_step! = make_agent_stepping(; walk_type = ALTERNATED_WALK, eat = true, reproduce = true)
+agent_step! = herbivore_dynamics(; walk_type = ALTERNATED_WALK, eat = true, reproduce = true)
 
 
 
@@ -151,7 +151,7 @@ agent_step! = make_agent_stepping(; walk_type = ALTERNATED_WALK, eat = true, rep
 
 
 ## Model step. 
-model_step! = make_model_stepping(; walkmap = true)
+model_step! = grass_growth_dynamics(; walkmap = true)
 
 
 

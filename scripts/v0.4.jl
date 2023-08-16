@@ -104,14 +104,15 @@ end
 
 
 ## Define agent_step!
-agent_step! = make_agent_stepping(; 
+agent_step! = herbivore_dynamics(; 
     walk_type = ALTERNATED_WALK,
     eat = true, 
     reproduce = true
 )
 
+
 # Model stepping function
-model_step! = make_model_stepping()
+model_step! = grass_growth_dynamics()
 
 
 ## Initialize model

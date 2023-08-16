@@ -1,3 +1,6 @@
+# include("distributions.jl")
+
+
 """
     plot_abm_model(model::ABM, agent_step!::Function, model_step!::Function)
 
@@ -52,3 +55,100 @@ function plot_abm_model(model::ABM, agent_step!::Function, model_step!::Function
     
     return fig, ax, abmobs
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function plot_weibull(k = 1.5, λ = 2.0)
+
+    weibull_distribution = Weibull(k, λ)
+
+    x = range(0, stop=8, length=1000)
+    pdf_values = pdf.(weibull_distribution, x)
+
+    fig = Figure(resolution = (800, 400))
+    ax = Axis(fig[1, 1], xlabel = "x", ylabel = "Density")
+    lines!(ax, x, pdf_values)
+    return fig
+end
+
+
+
+
+function plot_vonmises(μ = 0.0, k = 1.0)
+
+    vonmises_distribution = VonMises(μ, κ)
+
+    x = range(-π, stop=π, length=1000)
+    pdf_values = pdf.(vonmises_distribution, x)
+
+    fig = Figure(resolution = (800, 400))
+    ax = Axis(fig[1, 1], xlabel = "Angle (radians)", ylabel = "Density")
+    lines!(ax, x, pdf_values)
+
+
+    return fig
+end
+
+
+
+# function plot_wrapcauchy(;μ = 0.0, ρ = 0.5)
+#     #https://github.com/JuliaStats/Distributions.jl/pull/1665
+#     #https://github.com/jeremyworsfold/Distributions.jl/blob/master/src/univariate/continuous/wrappedcauchy.jl
+#     wrapcauchy_distribution = WrappedCauchy(μ, ρ)
+
+#     x = range(-π, stop=π, length=1000)
+#     pdf_values = pdf.(wrapcauchy_distribution, x)
+
+#     fig = Figure(resolution = (800, 400))
+#     ax = Axis(fig[1, 1], xlabel = "Angle (radians)", ylabel = "Density")
+#     lines!(ax, x, pdf_values)
+#     return fig
+# end
+
+
+
+
+
+
+
+
+function plot_shrubland(N, patch_size=2, density_factor=0.5)
+    # Generate the shrubland
+    shrubland = generate_shrubland(N, patch_size, density_factor)
+
+    # Plot the shrubland as a heatmap
+    fig = Figure()
+    heatmap!(fig[1, 1], shrubland; colormap=:viridis)
+    colorlegend!(fig[1, 1], "Density"; vertical=false, flipaxis=false)
+    axis = fig[1, 1, Axis]
+    axis.title = "Shrubland"
+    return fig
+end
+
+
+function plot_shrubland2rand(N, num_spots = 5, σx = 5, σy = 5) 
+    # Generate the shrubland
+    shrubland = generate_shrubland2(N, num_spots, σx, σy) 
+    custom_colormap = [:white, :green]
+
+    # Plot the shrubland as a heatmap
+    fig = heatmap(shrubland; colormap=custom_colormap)
+    return fig
+
+end
+

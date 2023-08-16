@@ -4,6 +4,9 @@
 # point where the sheep gravitate towards.  
 
 
+using DrWatson
+@quickactivate "Animal-Movement-ABM"
+
 
 using Agents, LinearAlgebra
 using Random
@@ -17,6 +20,10 @@ using GLMakie
     speed::Float64
 end
 
+
+include(srcdir("agent_actions.jl"))
+include(srcdir("plotting.jl"))
+include(srcdir("model_actions.jl"))
 
 
 function initialize_model(;
@@ -117,9 +124,10 @@ end
 
 
 const sheep_polygon = Polygon(Point2f[(-0.5, -0.5), (1, 0), (-0.5, 0.5)])
+
 function sheep_marker(b::Sheep)
     φ = atan(b.vel[2], b.vel[1]) #+ π/2 + π
-    scale(rotate2D(sheep_polygon, φ), 2)
+    InteractiveDynamics.scale(rotate2D(sheep_polygon, φ), 2)
 end
 
 
@@ -129,7 +137,6 @@ fig, = abmplot(model; agent_step!, am = sheep_marker)
 fig
 
 
-rand(Uniform(-1, 1))
 
 
 offset(a) = (-0.1, -0.1*rand()) 
@@ -157,14 +164,16 @@ plotkwargs = (;
 
 
 
+model_step! = grass_growth_dynamics(; walkmap = true)
 
+model_stepp!() = 5
 
 model = initialize_model()
 
 fig, ax, abmobs = abmplot(model;
-    # agent_step!, 
-    # model_step!, 
-    # params, 
+    agent_step!, 
+    model_stepp!, 
+    params, 
     plotkwargs...
 )
 fig

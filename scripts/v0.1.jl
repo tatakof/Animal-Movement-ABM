@@ -85,7 +85,7 @@ end
 agent_step! = make_agent_stepping(;walk_type = RANDOM_WALK, eat = true, reproduce = true)
 
 # Model stepping function
-model_step! = make_model_stepping()
+model_step! = grass_growth_dynamics()
 
 ## Initialize model
 model = initialize_model()

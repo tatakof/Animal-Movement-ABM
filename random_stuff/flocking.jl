@@ -121,7 +121,7 @@ CairoMakie.activate!() # hide
 const bird_polygon = Polygon(Point2f[(-0.5, -0.5), (1, 0), (-0.5, 0.5)])
 function bird_marker(b::Bird)
     φ = atan(b.vel[2], b.vel[1]) #+ π/2 + π
-    scale(rotate2D(bird_polygon, φ), 2)
+    InteractiveDynamics.scale(rotate2D(bird_polygon, φ), 2)
 end
 
 # Where we have used the utility functions `scale` and `rotate2D` to act on a

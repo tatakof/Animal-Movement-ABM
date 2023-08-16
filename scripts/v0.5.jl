@@ -127,11 +127,11 @@ end
 
 ## Agent stepping function
 # Make a random walk taking into account the positions agents can and cannot take
-agent_step! = make_agent_stepping(; walk_type = RANDOM_WALKMAP, eat = true, reproduce = true)
+agent_step! = herbivore_dynamics(; walk_type = RANDOM_WALKMAP, eat = true, reproduce = true)
 
 
 ## Model step. 
-model_step! = make_model_stepping(; walkmap = true)
+model_step! = grass_growth_dynamics(; walkmap = true)
 
 
 ## Initialize model

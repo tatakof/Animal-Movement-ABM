@@ -93,16 +93,16 @@ The agent_step function will alternate between a "normal" random walk
 """
 
 # Agent stepping function
-agent_step! = make_agent_stepping(; 
+agent_step! = herbivore_dynamics(; 
     walk_type = RANDOM_WALK_GREGARIOUS, 
     eat = true, 
     reproduce = true, 
-    prob_random_walk = 0.1
+    #prob_random_walk = 0.1
 )
 
 
 # Model stepping function
-model_step! = make_model_stepping()
+model_step! = grass_growth_dynamics()
 
 
 

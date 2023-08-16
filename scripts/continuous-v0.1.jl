@@ -20,6 +20,14 @@ include(srcdir("agent_actions.jl"))
 include(srcdir("plotting.jl"))
 include(srcdir("model_actions.jl"))
 
+# OLD
+# @agent Sheep ContinuousAgent{2} begin
+#     energy::Float64
+#     reproduction_prob::Float64
+#     Δenergy::Float64
+#     speed::Float64
+# end
+
 
 @agent Sheep ContinuousAgent{2} begin
     energy::Float64
@@ -122,6 +130,7 @@ end
 
 
 const sheep_polygon = Polygon(Point2f[(-0.5, -0.5), (1, 0), (-0.5, 0.5)])
+
 function sheep_marker(b::Sheep)
     φ = atan(b.vel[2], b.vel[1]) #+ π/2 + π
     InteractiveDynamics.scale(rotate2D(sheep_polygon, φ), 2)

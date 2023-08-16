@@ -1,0 +1,33 @@
+# Random walks
+
+Para modelar Random Walks, hace falta distribuciones circulares. 
+Hay 2 principales para elegir: Von Mises y Wrap Cauchy. 
+Von Mises tiene colas más similares a una Normal (y tiene mejores propiedades matemáticas?)
+Wrap Cauchy tiene colas más gordas. 
+
+
+## Correlated Random Walk (CRW)
+
+El Correlated Random Walk intenta modelar la persistencia en la dirección de movimiento. 
+
+Von Mises tiene un parámetro de media Mu. Para hacer un CRW, mu debe tomar el valor del angulo de direccion previo. O alternativamente, al angulo de direccion previo tenes que sumarle un valor de una Von Mises centrada en 0.  
+Von mises también tiene un parámetro Kappa, que determina el grado de concentración alrededor de la media. 
+
+
+
+## Biased Random Walk (BRW)
+El animal siempre se mueve en una dirección. Esta dirección es la media de la distribución circular. 
+
+
+
+## Centrally Biased Random Walk (CBRW)
+El animal sabe hacia qué punto quiere ir. Ese punto está en una dirección respecto a la posición actual del animal. Por lo tanto, en cada t, hay que calcular la dirección al punto al que el animal quiere ir, y usar esa dirección como media de la distribución circular.   
+
+
+## Biased Correlated Random Walk (BCRW)
+Ahora en cada t hay dos direcciones, la dirección previa (por la parte de Correlated) y la dirección a la que quiere ir (por el Biased). Ahora hay un parámetro que indica el peso entre la importancia del Bias y la importancia del Correlated. Hay que hacer como un promedio ponderado entre la dirección del Bias y la dirección del Correlated, pero no es tan sencillo porque son vectores?
+
+
+
+
+

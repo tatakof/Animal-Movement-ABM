@@ -87,12 +87,11 @@ end
 # Agent stepping function
 # The agent_step function will alternate between a "normal" random walk
 # and a weighted random walk to the attractor. 
-agent_step! = make_agent_stepping(; walk_type = RANDOM_WALK_ATTRACTOR, eat = true, reproduce = true)
+agent_step! = herbivore_dynamics(; walk_type = RANDOM_WALK_ATTRACTOR, eat = true, reproduce = true)
 
 
 # Model stepping function
-model_step! = make_model_stepping()
-
+model_step! = grass_growth_dynamics()
 
 ## Initialize model
 model = initialize_model()
