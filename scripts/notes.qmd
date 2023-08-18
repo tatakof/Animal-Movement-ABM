@@ -131,3 +131,119 @@ Tensorflow usa colin.
 
 
 
+------------------------- NOTAS EN PAPEL -------------
+# Notas sobre modelo de simulacion de movimiento animal
+ver paper de hank y hooten: Agent-based Inference for Animal Movement. (tambien escribiste al lado de esto: kernel con logisticta. cambios en comportamiento dan cambios en selec de habitat?)
+
+
+Habitat selection en espacio continuo implicaría un step selection poco eficiente. 
+
+
+Punto de repulsión. (entiendo que esto lo escribiste cuando hablabas de areas de repulsion al modelar movimiento colectivo)
+
+
+Todos ahora en mov animal están haciendo step selection y HMMs
+
+
+Movimiento cuando los animales saben a donde quieren ir lo modelariamos con un biased correlated random walk. 
+
+Step selection con regresiones. 
+
+Contenedores: para descanso, exploracion, forrajeo 
+Los contenedores se cargan de forma lineal y se descargan de forma lineal (aunque puede ser otra func como exponencial)
+Estos contenedores son para hacer Recharge Dynamics, que los usamos para modelar transicion de comportamientos.
+La idea es que el bicho que esta en un comportamiento determinado, por ejemplo el de forrajeo, se le va cargando el 
+contenedor de "alimento" y la probabilidad de dejar de forrajear es funcion de cuan lleno este ese contenedor. 
+Vamos a iniciar recharge dynamics para forrajeo y despues vemos si lo extendemos a mas comportamientos. 
+
+
+
+Ver cuestiones alometricas para incluir en el modelo en el paper de elks de pajaro (2005 o 2004)
+
+
+Definir donde el bicho quiere ir es una gran cuestion. 
+Ver papers de elks reintroducidos
+
+
+Los Integral Projection Model -> son extension de modelos matriciales. 
+
+
+
+Switch de comportamiento informado por estado interno es una posibilidad, pero puede ser reemplazado por Recharge Dynamics. 
+
+
+La energia que gana el bicho se va a crecimiento o a reservas. (en el modelo de sim de pajaro, al final del dia
+se decide a donde va la energia, si a crecimiento o a reservas)
+
+
+Necesitamos tener una forma de contabilidad de tiempo pasado en cada comportamiento y de distancia de desplazamiento
+
+Energia de balance = Energia consumida - Energia gastada en locomocion
+
+80% de grasa y 20% de proteina. 
+
+Las ovejas de Pilca tienen un dt de 5 minutos. 
+
+dt razonable segun pajaro -> 1 hora. 
+
+
+
+Direccion de movimiento se computa a cada t?
+
+
+Agents -> ICS (Internal Control System)
+
+Read Paper called Collective Behaviour from surprise minimization. The paper talks about the Social Dilema (individual interest vs Collective Interest), about models of bounded rationality and subject rationality, and also about observing pulling and anchoring in movement behaviours. 
+
+
+
+
+usar un dt de minutos. 
+
+escala de grupos: modelar unas semanas (aca se pueden ignorar muchas cosas, como reproduccion, y se puede tener un dt de minuto)
+escala poblacional: modelar por ejemplo un año o mas. esto implica eventos de reproduccion, etc 
+
+
+recharge dynamics puede ser demasiado costoso computacionalmente porque implicaria evaluar una prob en cada dt, tal vez se puede aproximar con algo menos costoso usando algo como tiempos en los que pasa en cada comportamiento
+
+
+# Experimentos
+
+Experimentos a hacer con modelo de simulacion: 
+- Exp 1 animales +o- selectivos con el habitat. 
+- Exp 2 conflicto entre benficio del individuo y beneficio del grupo. 
+
+
+
+
+
+# Notas sobre transformers (charla con Colin)
+
+Train on 80% of individuals and test in the rest
+
+dropout can reduce overfitting
+
+Try a very small CNN
+
+
+probar vision transformer -> Puede prestar atencion a toda la imagen, la covnet solo "mira a 3 lugares" (revisar si esto ultimo que escribiste esta bien)
+
+
+
+
+
+
+
+
+
+
+# Caps de tesis
+Cap1 -> Decoder
+Cap2 -> Modelo de simulacion
+Cap3 -> experimentos de simulacion y/o ajuste de modelo de simulacion a datos. 
+
+
+
+# Papers
+Decoder paper en ecologia -> un poco de docencia sobre como funcionan y como usarlos. 
+
